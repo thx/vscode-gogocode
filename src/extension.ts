@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { GoGoCodePanel } from './panel';
+import { TransformFileCommand } from './command';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -19,14 +20,19 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(disposable);
 
-	if (vscode.window.registerWebviewPanelSerializer) {
-		// Make sure we register a serializer in activation event
-		vscode.window.registerWebviewPanelSerializer(GoGoCodePanel.viewType, {
-			async deserializeWebviewPanel(webviewPanel: vscode.WebviewPanel, state: any) {
-				GoGoCodePanel.revive(webviewPanel, context.extensionPath);
-			}
-		});
-	}
+  TransformFileCommand.registerCommand(context);
+
+  if (vscode.window.registerWebviewPanelSerializer) {
+    // Make sure we register a serializer in activation event
+    vscode.window.registerWebviewPanelSerializer(GoGoCodePanel.viewType, {
+      async deserializeWebviewPanel(
+        webviewPanel: vscode.WebviewPanel,
+        state: any
+      ) {
+        GoGoCodePanel.revive(webviewPanel, context.extensionPath);
+      },
+    });
+  }
 }
 
 // this method is called when your extension is deactivated

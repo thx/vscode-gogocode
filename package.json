@@ -11,7 +11,8 @@
   ],
   "activationEvents": [
     "onCommand:gogocode.open",
-		"onWebviewPanel:gogocode"
+    "onCommand:gogocode.transformFile",
+    "onWebviewPanel:gogocode"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -19,8 +20,21 @@
       {
         "command": "gogocode.open",
         "title": "Open GoGoCode"
+      },
+      {
+        "command": "gogocode.transformFile",
+        "title": "用 GoGoCode 转换"
       }
-    ]
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "!explorerResourceIsFolder",
+          "command": "gogocode.transformFile",
+          "group": "2_workspace"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run package",

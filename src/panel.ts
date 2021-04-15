@@ -12,8 +12,10 @@ export class GoGoCodePanel {
   private readonly _panel: vscode.WebviewPanel;
   private readonly _extensionPath: string;
   private _disposables: vscode.Disposable[] = [];
-  private currentSearch: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+
   private paths: string[] = [];
+  private _activedMessages: any[] = [];
+  private _isWebviewActived: boolean = false;
 
   public static createOrShow(extensionPath: string) {
     const activeEditor = vscode.window.activeTextEditor;
@@ -42,6 +44,15 @@ export class GoGoCodePanel {
         }
       );
       GoGoCodePanel.currentPanel = new GoGoCodePanel(panel, extensionPath);
+    }
+    return GoGoCodePanel.currentPanel;
+  }
+
+  public postMessageToWebview(message: any) {
+    if (this._isWebviewActived) {
+      this._panel.webview.postMessage(message);
+    } else {
+      this._activedMessages.push(message);
     }
   }
 
@@ -75,9 +86,34 @@ export class GoGoCodePanel {
     this._panel.webview.onDidReceiveMessage(
       (message) => {
         switch (message.command) {
-          case 'log-message':
+          case 'activated':
+            this._isWebviewActived = true;
+            while (this._activedMessages.length) {
+              const message = this._activedMessages.shift();
+              this._panel.webview.postMessage(message);
+            }
+            break;
+          case 'log':
             console.log(message);
-            return;
+            break;
+          case 'get-file-content': {
+            this.onGetFileContent(message.path);
+            break;
+          }
+          case 'replace-one': {
+            const path = message.path;
+            const content = message.content;
+            fs.promises.writeFile(path, content).then(() => {
+              this.postMessageToWebview({
+                command: 'message',
+                type: 'success',
+                duration: 2,
+                content: `文件：${path} 已经成功替换`,
+              });
+              this.onGetFileContent(path);
+            });
+            break;
+          }
         }
       },
       null,
@@ -90,7 +126,7 @@ export class GoGoCodePanel {
 
     // Clean up our resources
     this._panel.dispose();
-    this.currentSearch.dispose();
+    this._isWebviewActived = false;
 
     while (this._disposables.length) {
       const x = this._disposables.pop();
@@ -98,6 +134,15 @@ export class GoGoCodePanel {
         x.dispose();
       }
     }
+  }
+
+  private onGetFileContent(path: string) {
+    const content = fs.readFileSync(path).toString();
+    this.postMessageToWebview({
+      command: 'file-content',
+      path,
+      content,
+    });
   }
 
   private _getHtmlForWebview() {
