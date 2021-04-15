@@ -3,7 +3,7 @@
   "displayName": "GoGoCode Refactor",
   "description": "use code to refactor your code easily",
   "icon": "icon.png",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.55.0"
   },
