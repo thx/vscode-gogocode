@@ -101,7 +101,10 @@ export class GoGoCodePanel {
   }
 
   private _getHtmlForWebview() {
-    const resourcePath = path.join(this._extensionPath, 'webview.html');
+    const resourcePath =
+      process.env.NODE_ENV === 'development'
+        ? path.join(this._extensionPath, 'webview.dev.html')
+        : path.join(this._extensionPath, 'webview.html');
     return fs.readFileSync(resourcePath, 'UTF-8');
   }
 }
