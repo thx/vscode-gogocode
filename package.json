@@ -2,9 +2,15 @@
   "name": "vscode-gogocode",
   "displayName": "GoGoCode Refactor",
   "description": "use code to refactor your code easily",
+  "icon": "icon.png",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.55.0"
+  },
+  "publisher": "mmfe",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thx/vscode-gogocode.git"
   },
   "categories": [
     "Other"
