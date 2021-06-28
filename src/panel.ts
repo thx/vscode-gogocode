@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import { runGoGoCode } from './util';
 
 export class GoGoCodePanel {
   /**
@@ -112,6 +113,40 @@ export class GoGoCodePanel {
               });
               this.onGetFileContent(path);
             });
+            break;
+          }
+          case 'replace-all': {
+            const treeData = message.treeData;
+            const transformCode = message.transformCode;
+            
+            const pathList: string[] = [];
+            flatTreeData(treeData);
+
+            Promise.all(pathList.map(path => doTransform(path, transformCode)))
+            .then(() => {
+              this.postMessageToWebview({
+                command: 'message',
+                type: 'success',
+                duration: 2,
+                content: `替换成功！`,
+              });
+            });
+
+            function flatTreeData(originData: any) {
+              if (!originData || !originData.length) return;
+              originData.forEach((item: any) => {
+                const { key, isLeaf, children } = item;
+                if (isLeaf) {
+                  pathList.push(key);
+                }
+                children && children.length && flatTreeData(children);
+              })
+            }
+            function doTransform(path: string, transformCode: string) {
+              const inputCode = fs.readFileSync(path).toString();
+              const content = runGoGoCode(inputCode, transformCode, path);
+              return fs.promises.writeFile(path, content)
+            }
             break;
           }
         }
