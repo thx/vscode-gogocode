@@ -10,6 +10,10 @@ export class TransformFileCommand {
         const currentPanel = GoGoCodePanel.createOrShow(context.extensionPath);
         const filePath = args.path;
         currentPanel.postMessageToWebview({
+          command: 'folder-paths',
+          treeData: []
+        });
+        currentPanel.postMessageToWebview({
           command: 'file-paths',
           filePaths: [filePath]
         });
@@ -66,16 +70,19 @@ export class VueUpCommand {
          
           return;
         }
-        
-        try {
-          const dir = args.path.split('/').slice(0, -1).join('/');
-          const path = args.path.split('/').pop()
-          const split = getCommandSplit();
-          await execSync(`cd ${dir} ${split} gogocode -s ./${path} -t gogocode-plugin-vue -o ./${path}-out`)
-        } catch (e) {
-          vscode.window.showErrorMessage(e.stack)
-          return;
-        }
+        vscode.window.showWarningMessage('vue2代码升级中，请稍候...')
+        setTimeout(async () => {
+          try {
+            const dir = args.path.split('/').slice(0, -1).join('/');
+            const path = args.path.split('/').pop()
+            const split = getCommandSplit();
+            await execSync(`cd ${dir} ${split} gogocode -s ./${path} -t gogocode-plugin-vue -o ./${path}-out`)
+            vscode.window.showInformationMessage('vue2代码转换成功！如遇问题，请前往https://github.com/thx/gogocode/issues反馈，感谢！')
+          } catch (e) {
+            vscode.window.showErrorMessage(e.stack + '\n vue2代码转换失败！请前往https://github.com/thx/gogocode/issues反馈，感谢！')
+            return;
+          }
+        }, 2)
       })
     );
   }
