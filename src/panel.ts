@@ -144,8 +144,12 @@ export class GoGoCodePanel {
             }
             function doTransform(path: string, transformCode: string) {
               const inputCode = fs.readFileSync(path).toString();
-              const content = runGoGoCode(inputCode, transformCode, path);
-              return fs.promises.writeFile(path, content)
+              try {
+                const content = runGoGoCode(inputCode, transformCode, path);
+                return fs.promises.writeFile(path, content)
+              } catch(e) {
+                return;
+              }
             }
             break;
           }
