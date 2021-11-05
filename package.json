@@ -59,6 +59,20 @@
           "command": "gogocode.vueUp",
           "group": "2_workspace"
         }
+      ],
+      "editor/context": [
+        {
+          "when": "isFileSystemResource && editorFocus",
+          "command": "gogocode.transformFile",
+          "group": "2_workspace"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "when": "isFileSystemResource",
+          "command": "gogocode.transformFile",
+          "group": "2_workspace"
+        }
       ]
     }
   },
