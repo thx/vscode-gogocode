@@ -10,7 +10,7 @@ export class TransformFileCommand {
     context.subscriptions.push(
       vscode.commands.registerCommand('gogocode.transformFile', (args) => {
         const currentPanel = GoGoCodePanel.createOrShow(context.extensionPath);
-        const filePath = args.path;
+        const filePath = args.fsPath;
         currentPanel.postMessageToWebview({
           command: 'folder-paths',
           treeData: []
@@ -32,7 +32,7 @@ export class TransformFolderCommand {
     context.subscriptions.push(
       vscode.commands.registerCommand('gogocode.transformFolder', (args) => {
         const currentPanel = GoGoCodePanel.createOrShow(context.extensionPath);
-        const treeData = formatTreeData([dirTree(args.path)]);
+        const treeData = formatTreeData([dirTree(args.fsPath)]);
         if (!treeData) return;
         currentPanel.postMessageToWebview({
           command: 'folder-paths',
@@ -78,13 +78,21 @@ export class VueUpCommand {
         vscode.window.showWarningMessage('vue2代码升级中，请稍候......')
         setTimeout(async () => {
           try {
-            const basePath = path.resolve(args.path, '../')
-            const dirName = path.basename(args.path)
+            const dir = args.fsPath;
+            const basePath = path.resolve(dir, '../')
+            const dirName = path.basename(dir)
             const outPath = path.resolve(basePath, `${dirName}-out`)
-            const cmdArgs = ['-s', args.path, '-t', 'gogocode-plugin-vue', '-o', outPath]
-            const { error } = spawn.sync('gogocode', cmdArgs)
+            const cmdArgs = ['-s', dir, '-t', 'gogocode-plugin-vue', '-o', outPath]
+            const { error, stdout, stderr} = spawn.sync('gogocode', cmdArgs)
             if (error) {
               throw error
+            }
+            
+            if (stdout) {
+              console.log(stdout.toString())
+            }
+            if (stderr) {
+              console.log(stderr.toString())
             }
             vscode.window.showInformationMessage('vue2代码转换成功！如遇问题，请前往https://github.com/thx/gogocode/issues反馈，感谢！')
           } catch (e: any) {
