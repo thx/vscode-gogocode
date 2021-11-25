@@ -2,7 +2,9 @@ import * as vscode from 'vscode';
 import { GoGoCodePanel } from './panel';
 import * as dirTree from 'directory-tree';
 import { execSync } from 'child_process';
-import { getCommandSplit } from './util';
+const spawn = require('cross-spawn');
+import * as path from 'path';
+
 export class TransformFileCommand {
   public static registerCommand(context: vscode.ExtensionContext) {
     context.subscriptions.push(
@@ -60,26 +62,34 @@ export class VueUpCommand {
     context.subscriptions.push(
       vscode.commands.registerCommand('gogocode.vueUp', async (args) => {
         try {
-          await execSync('gogocode -V');
-        } catch (e) {
+          const { error } = spawn.sync('gogocode', ['-V'])
+          if (error) {
+            throw error
+          }
+        } catch (e: any) {
           if (e.message.match('command not found'))  {
             vscode.window.showErrorMessage('请先安装gogocode-cli: npm install gogocode-cli -g');
           } else {
             vscode.window.showErrorMessage(e.stack)
           }
-         
+          console.error(e)
           return;
         }
-        vscode.window.showWarningMessage('vue2代码升级中，请稍候...')
+        vscode.window.showWarningMessage('vue2代码升级中，请稍候......')
         setTimeout(async () => {
           try {
-            const dir = args.path.split('/').slice(0, -1).join('/');
-            const path = args.path.split('/').pop()
-            const split = getCommandSplit();
-            await execSync(`cd ${dir} ${split} gogocode -s ./${path} -t gogocode-plugin-vue -o ./${path}-out`)
+            const basePath = path.resolve(args.path, '../')
+            const dirName = path.basename(args.path)
+            const outPath = path.resolve(basePath, `${dirName}-out`)
+            const cmdArgs = ['-s', args.path, '-t', 'gogocode-plugin-vue', '-o', outPath]
+            const { error } = spawn.sync('gogocode', cmdArgs)
+            if (error) {
+              throw error
+            }
             vscode.window.showInformationMessage('vue2代码转换成功！如遇问题，请前往https://github.com/thx/gogocode/issues反馈，感谢！')
-          } catch (e) {
+          } catch (e: any) {
             vscode.window.showErrorMessage(e.stack + '\n vue2代码转换失败！请前往https://github.com/thx/gogocode/issues反馈，感谢！')
+            console.error(e)
             return;
           }
         }, 2)
