@@ -16,7 +16,6 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:gogocode.open",
     "onCommand:gogocode.transformFile",
     "onCommand:gogocode.transformFolder",
     "onCommand:gogocode.vueUp",
@@ -25,10 +24,6 @@
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
-      {
-        "command": "gogocode.open",
-        "title": "Open GoGoCode"
-      },
       {
         "command": "gogocode.transformFile",
         "title": "用 GoGoCode 转换"
@@ -43,6 +38,16 @@
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "gogocode.vueUp",
+          "when": "false"
+        },
+        {
+          "command": "gogocode.transformFolder",
+          "when": "false"
+        }
+      ],
       "explorer/context": [
         {
           "when": "!explorerResourceIsFolder",

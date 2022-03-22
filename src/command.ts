@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { GoGoCodePanel } from './panel';
 import * as dirTree from 'directory-tree';
-import { execSync } from 'child_process';
+
 const spawn = require('cross-spawn');
 import * as path from 'path';
 
@@ -10,7 +10,11 @@ export class TransformFileCommand {
     context.subscriptions.push(
       vscode.commands.registerCommand('gogocode.transformFile', (args) => {
         const currentPanel = GoGoCodePanel.createOrShow(context.extensionPath);
-        const filePath = args.fsPath;
+        const filePath = args?.fsPath || vscode.window.activeTextEditor?.document?.fileName;
+        if (!filePath) {
+          vscode.window.showErrorMessage('No filePath');
+          return;
+        }
         currentPanel.postMessageToWebview({
           command: 'folder-paths',
           treeData: []
@@ -19,9 +23,7 @@ export class TransformFileCommand {
           command: 'file-paths',
           filePaths: [filePath]
         });
-        if (!filePath) {
-          return;
-        }
+
       })
     );
   }
